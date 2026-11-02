@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>肥猪兑换券 · 生日惊喜</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft Yahei",sans-serif}
+body{background:#fff0f6;padding:20px;color:#444}
+.title{text-align:center;margin-bottom:30px}
+.title h1{color:#e86890;font-size:24px;margin-bottom:8px}
+.title p{color:#999}
+.container{max-width:600px;margin:0 auto;display:grid;gap:16px}
+.card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 12px #00000010;border:2px solid #ffd6e4;transition:0.3s}
+.card.lock{background:#f7f7f7;border-color:#ddd;color:#aaa}
+.card.used{background:#fff1f7;border-color:#f8b8d0}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.name{font-size:18px;font-weight:bold;color:#e86890}
+.lock .name{color:#aaa}
+.money{font-size:26px;font-weight:bold;color:#e86890}
+.lock .money{color:#aaa}
+.info{font-size:14px;color:#777;margin:8px 0}
+.btn{margin-top:12px;width:100%;padding:12px;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;background:#e86890;color:#fff}
+.btn:disabled{background:#cccccc;cursor:not-allowed}
+.used-tag{margin-top:12px;text-align:center;color:#e86890;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="title">
+<h1>🎀 肥猪兑换券 🎀</h1>
+<p>慢慢解锁，慢慢欢喜</p>
+</div>
+<div class="container" id="box"></div>
+
+<script>
+const list = [
+  {date:"2026-11-11",name:"第1张 肥猪兑换券"},
+  {date:"2026-11-18",name:"第2张 肥猪兑换券"},
+  {date:"2026-11-25",name:"第3张 肥猪兑换券"},
+  {date:"2026-12-02",name:"第4张 肥猪兑换券"},
+  {date:"2026-12-09",name:"第5张 肥猪兑换券"},
+  {date:"2026-12-16",name:"第6张 肥猪兑换券"},
+  {date:"2026-12-23",name:"第7张 肥猪兑换券"},
+];
+const storageKey = "coupon_used";
+let usedArr = JSON.parse(localStorage.getItem(storageKey) || "[]");
+
+function getDayDiff(targetDateStr){
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const target = new Date(targetDateStr);
+  target.setHours(0,0,0,0);
+  return Math.ceil((target - now)/(1000*60*60*24));
+}
+
+function render(){
+  const box = document.getElementById("box");
+  box.innerHTML = "";
+  list.forEach((item,idx)=>{
+    const diff = getDayDiff(item.date);
+    const isUnlock = diff <= 0;
+    const isUsed = usedArr.includes(idx);
+    let cls = "";
+    if(!isUnlock) cls = "lock";
+    else if(isUsed) cls = "used";
+
+    let html = `
+    <div class="card ${cls}">
+      <div class="card-header">
+        <div class="name">${item.name}</div>
+        <div class="money">¥79</div>
+      </div>
+      <div class="info">解锁日期：${item.date}</div>
+    `;
+    if(!isUnlock){
+      html += `<div class="info">🔒 还有 ${diff} 天解锁</div>`;
+      html += `<button class="btn" disabled>暂未解锁</button>`;
+    }else if(isUsed){
+      html += `<div class="used-tag">✅ 已兑换</div>`;
+    }else{
+      html += `<button class="btn" onclick="useCoupon(${idx})">确认兑换</button>`;
+    }
+    html += `</div>`;
+    box.innerHTML += html;
+  })
+}
+
+function useCoupon(i){
+  if(usedArr.includes(i)) return;
+  if(!confirm("确定兑换这张肥猪兑换券吗？兑换之后标记为已使用！")) return;
+  usedArr.push(i);
+  localStorage.setItem(storageKey, JSON.stringify(usedArr));
+  render();
+  alert("兑换成功！记得兑现红包🥰");
+}
+render();
+</script>
+</body>
+</html>
